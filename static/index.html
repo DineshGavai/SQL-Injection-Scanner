@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SQL Injection Scanner</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 2.5em;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 40px;
+        font-size: 1.1em;
+      }
+
+      .input-group {
+        margin-bottom: 30px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+      }
+
+      input[type="url"] {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+      }
+
+      input[type="url"]:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .scan-button {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .scan-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+      }
+
+      .scan-button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+        color: #667eea;
+        font-weight: 600;
+      }
+
+      .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .results {
+        margin-top: 30px;
+        display: none;
+      }
+
+      .results-header {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        padding: 20px;
+        border-radius: 10px 10px 0 0;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .results-content {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 0 0 10px 10px;
+        padding: 20px;
+      }
+
+      .vulnerability {
+        background: #fff5f5;
+        border-left: 4px solid #e53e3e;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 0 8px 8px 0;
+      }
+
+      .vulnerability.high {
+        border-left-color: #e53e3e;
+        background: #fff5f5;
+      }
+
+      .vulnerability h4 {
+        color: #e53e3e;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+      }
+
+      .vulnerability h4::before {
+        content: "⚠️";
+        margin-right: 8px;
+      }
+
+      .no-vulnerabilities {
+        background: #f0fff4;
+        border-left: 4px solid #38a169;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 0 8px 8px 0;
+        color: #2d5738;
+      }
+
+      .no-vulnerabilities::before {
+        content: "✅ ";
+      }
+
+      .error {
+        background: #fff5f5;
+        border: 2px solid #e53e3e;
+        color: #e53e3e;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      .stat-card {
+        background: linear-gradient(45deg, #f7fafc, #edf2f7);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+      }
+
+      .stat-number {
+        font-size: 2em;
+        font-weight: bold;
+        color: #667eea;
+      }
+
+      .stat-label {
+        color: #666;
+        margin-top: 5px;
+      }
+
+      .payload-code {
+        background: #f7fafc;
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        margin: 5px 0;
+        border: 1px solid #e2e8f0;
+      }
+
+      .indicators {
+        margin-top: 10px;
+      }
+
+      .indicator {
+        background: #ffeaea;
+        color: #c53030;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        margin: 2px;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🛡️ SQL Injection Scanner</h1>
+      <p class="subtitle">Advanced Web Application Security Testing Tool</p>
+
+      <form id="scanForm">
+        <div class="input-group">
+          <label for="url">Target URL:</label>
+          <input
+            type="url"
+            id="url"
+            name="url"
+            placeholder="https://issauga.lt/login-1/"
+            required
+          />
+        </div>
+
+        <button type="submit" class="scan-button" id="scanBtn">
+          Start Security Scan
+        </button>
+      </form>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        Scanning for vulnerabilities...
+      </div>
+
+      <div class="results" id="results">
+        <div class="results-header">
+          <span id="resultsTitle">Scan Results</span>
+        </div>
+        <div class="results-content" id="resultsContent">
+          <!-- Results will be populated here -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("scanForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const url = document.getElementById("url").value;
+          const scanBtn = document.getElementById("scanBtn");
+          const loading = document.getElementById("loading");
+          const results = document.getElementById("results");
+          const resultsContent = document.getElementById("resultsContent");
+          const resultsTitle = document.getElementById("resultsTitle");
+
+          // Reset UI
+          results.style.display = "none";
+          loading.style.display = "block";
+          scanBtn.disabled = true;
+          scanBtn.textContent = "Scanning...";
+
+          try {
+            const response = await fetch("/scan", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ url: url }),
+            });
+
+            const data = await response.json();
+
+            // Hide loading
+            loading.style.display = "none";
+
+            if (!response.ok) {
+              throw new Error(data.detail || "Scan failed");
+            }
+
+            // Display results
+            displayResults(data);
+          } catch (error) {
+            loading.style.display = "none";
+            displayError(error.message);
+          } finally {
+            scanBtn.disabled = false;
+            scanBtn.textContent = "Start Security Scan";
+          }
+        });
+
+      function displayResults(data) {
+        const results = document.getElementById("results");
+        const resultsContent = document.getElementById("resultsContent");
+        const resultsTitle = document.getElementById("resultsTitle");
+
+        if (data.error_message) {
+          displayError(data.error_message);
+          return;
+        }
+
+        resultsTitle.textContent = `Scan Results for ${data.url}`;
+
+        let html = `
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">${data.total_forms}</div>
+                        <div class="stat-label">Forms Found</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${
+                          data.vulnerabilities.length
+                        }</div>
+                        <div class="stat-label">Vulnerabilities</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${
+                          data.scan_completed ? "✅" : "❌"
+                        }</div>
+                        <div class="stat-label">Scan Status</div>
+                    </div>
+                </div>
+            `;
+
+        if (data.vulnerabilities.length > 0) {
+          html +=
+            '<h3 style="color: #e53e3e; margin-bottom: 15px;">⚠️ Security Vulnerabilities Detected</h3>';
+
+          data.vulnerabilities.forEach((vuln, index) => {
+            html += `
+                        <div class="vulnerability high">
+                            <h4>SQL Injection Vulnerability #${index + 1}</h4>
+                            <p><strong>Form Action:</strong> ${
+                              vuln.form_action
+                            }</p>
+                            <p><strong>Payload:</strong> <code class="payload-code">${
+                              vuln.payload
+                            }</code></p>
+                            <div class="indicators">
+                                <strong>Response Indicators:</strong><br>
+                                ${vuln.response_indicators
+                                  .map(
+                                    (indicator) =>
+                                      `<span class="indicator">${indicator}</span>`
+                                  )
+                                  .join("")}
+                            </div>
+                        </div>
+                    `;
+          });
+        } else {
+          html += `
+                    <div class="no-vulnerabilities">
+                        <strong>No SQL injection vulnerabilities detected.</strong>
+                        <p>The tested forms appear to be secure against basic SQL injection attacks.</p>
+                    </div>
+                `;
+        }
+
+        resultsContent.innerHTML = html;
+        results.style.display = "block";
+      }
+
+      function displayError(message) {
+        const results = document.getElementById("results");
+        const resultsContent = document.getElementById("resultsContent");
+        const resultsTitle = document.getElementById("resultsTitle");
+
+        resultsTitle.textContent = "Scan Error";
+        resultsContent.innerHTML = `
+                <div class="error">
+                    <strong>Error:</strong> ${message}
+                </div>
+            `;
+        results.style.display = "block";
+      }
+    </script>
+  </body>
+</html>
