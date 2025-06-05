@@ -208,17 +208,6 @@ pip install -r requirements.txt
 - Try `http://127.0.0.1:8000` instead of `http://0.0.0.0:8000`
 - Check if your firewall is blocking the connection
 
-## 🎯 Roadmap
-
-- [ ] Advanced payload generation
-- [ ] Custom header injection testing
-- [ ] Blind SQL injection detection
-- [ ] Multi-threaded scanning
-- [ ] Report export (PDF/HTML)
-- [ ] User authentication
-- [ ] Scan history and logging
-- [ ] Docker containerization
-
 ## 👨‍💻 Author
 
 **Dinesh Gavai**
