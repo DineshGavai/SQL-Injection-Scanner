@@ -87,7 +87,6 @@ Check out the live version of the SQL Injection Scanner:
 ```
 sql-injection-scanner/
 ├── main.py              # Main FastAPI application
-├── simple_main.py       # Simplified version (no external files)
 ├── requirements.txt     # Python dependencies
 ├── static/              # Frontend assets (if using main.py)
 │   └── index.html      # Web interface
