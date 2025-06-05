@@ -169,14 +169,6 @@ Contributions are welcome! Here's how you can help:
 5. **Push to the branch**: `git push origin feature/amazing-feature`
 6. **Open a Pull Request**
 
-### Ideas for Contributions
-
-- 🔍 Additional payload types
-- 📊 Export functionality (PDF, JSON reports)
-- 🔐 Authentication system
-- 📈 Database logging
-- 🎨 UI improvements
-- 🧪 Unit tests
 
 ## 📝 Dependencies
 
