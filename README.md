@@ -232,8 +232,8 @@ pip install -r requirements.txt
 
 **Dinesh Gavai**
 
-- GitHub: [@yourusername](https://github.com/DineshGavai)
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/dinesh-gavai)
+- GitHub: [@DineshGavai](https://github.com/DineshGavai)
+- LinkedIn: [Dinesh Gavai](https://linkedin.com/in/dinesh-gavai)
 - Email: gavaidinesh26@gmail.com
 
 ---

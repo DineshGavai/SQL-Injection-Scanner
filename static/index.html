@@ -19,7 +19,7 @@
       }
 
       .container {
-        max-width: 1000px;
+        max-width: 1200px;
         margin: 0 auto;
         background: rgba(255, 255, 255, 0.95);
         border-radius: 20px;
@@ -152,9 +152,10 @@
       .vulnerability {
         background: #fff5f5;
         border-left: 4px solid #e53e3e;
-        padding: 15px;
-        margin: 15px 0;
+        padding: 20px;
+        margin: 20px 0;
         border-radius: 0 8px 8px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       }
 
       .vulnerability.high {
@@ -164,14 +165,104 @@
 
       .vulnerability h4 {
         color: #e53e3e;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
         display: flex;
         align-items: center;
+        font-size: 1.2em;
       }
 
       .vulnerability h4::before {
         content: "⚠️";
         margin-right: 8px;
+      }
+
+      .vulnerability-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 15px;
+      }
+
+      .vulnerability-info {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .payload-explanation {
+        background: #f7fafc;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e0;
+        margin-top: 10px;
+      }
+
+      .payload-explanation h5 {
+        color: #2d3748;
+        margin-bottom: 10px;
+        font-size: 1em;
+        display: flex;
+        align-items: center;
+      }
+
+      .payload-explanation h5::before {
+        content: "🔍";
+        margin-right: 8px;
+      }
+
+      .technique-badge {
+        display: inline-block;
+        background: #e53e3e;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .risk-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+        margin-left: 10px;
+      }
+
+      .risk-high {
+        background: #fed7d7;
+        color: #c53030;
+      }
+
+      .risk-critical {
+        background: #742a2a;
+        color: white;
+      }
+
+      .risk-medium {
+        background: #fef5e7;
+        color: #c05621;
+      }
+
+      .explanation-text {
+        background: white;
+        padding: 12px;
+        border-radius: 6px;
+        border-left: 3px solid #667eea;
+        margin: 10px 0;
+        font-size: 0.95em;
+        line-height: 1.5;
+      }
+
+      .how-it-works {
+        background: #edf2f7;
+        padding: 12px;
+        border-radius: 6px;
+        margin: 10px 0;
+        font-size: 0.9em;
+        line-height: 1.5;
       }
 
       .no-vulnerabilities {
@@ -223,27 +314,40 @@
       }
 
       .payload-code {
-        background: #f7fafc;
-        padding: 8px 12px;
-        border-radius: 5px;
+        background: #2d3748;
+        color: #f7fafc;
+        padding: 10px 15px;
+        border-radius: 6px;
         font-family: "Courier New", monospace;
         font-size: 14px;
-        margin: 5px 0;
-        border: 1px solid #e2e8f0;
+        margin: 8px 0;
+        border: 1px solid #4a5568;
+        overflow-x: auto;
       }
 
       .indicators {
-        margin-top: 10px;
+        margin-top: 15px;
       }
 
       .indicator {
         background: #ffeaea;
         color: #c53030;
-        padding: 4px 8px;
-        border-radius: 4px;
+        padding: 6px 12px;
+        border-radius: 6px;
         font-size: 12px;
-        margin: 2px;
+        margin: 4px;
         display: inline-block;
+        border: 1px solid #feb2b2;
+      }
+
+      @media (max-width: 768px) {
+        .vulnerability-details {
+          grid-template-columns: 1fr;
+        }
+
+        .container {
+          padding: 20px;
+        }
       }
     </style>
   </head>
@@ -259,7 +363,7 @@
             type="url"
             id="url"
             name="url"
-            placeholder="https://issauga.lt/login-1/"
+            placeholder="https://example.com/login"
             required
           />
         </div>
@@ -332,6 +436,19 @@
           }
         });
 
+      function getRiskBadgeClass(riskLevel) {
+        switch (riskLevel.toLowerCase()) {
+          case "critical":
+            return "risk-critical";
+          case "high":
+            return "risk-high";
+          case "medium":
+            return "risk-medium";
+          default:
+            return "risk-medium";
+        }
+      }
+
       function displayResults(data) {
         const results = document.getElementById("results");
         const resultsContent = document.getElementById("resultsContent");
@@ -344,6 +461,16 @@
 
         resultsTitle.textContent = `Scan Results for ${data.url}`;
 
+        // Calculate vulnerability statistics
+        const uniquePayloads = [
+          ...new Set(data.vulnerabilities.map((v) => v.payload)),
+        ].length;
+        const highRiskCount = data.vulnerabilities.filter(
+          (v) =>
+            v.payload_explanation.risk_level.toLowerCase() === "high" ||
+            v.payload_explanation.risk_level.toLowerCase() === "critical"
+        ).length;
+
         let html = `
                 <div class="stats">
                     <div class="stat-card">
@@ -351,51 +478,106 @@
                         <div class="stat-label">Forms Found</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">${
-                          data.vulnerabilities.length
-                        }</div>
-                        <div class="stat-label">Vulnerabilities</div>
+                        <div class="stat-number">${data.vulnerabilities.length}</div>
+                        <div class="stat-label">Total Vulnerabilities</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">${
-                          data.scan_completed ? "✅" : "❌"
-                        }</div>
-                        <div class="stat-label">Scan Status</div>
+                        <div class="stat-number">${uniquePayloads}</div>
+                        <div class="stat-label">Unique Payloads</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${highRiskCount}</div>
+                        <div class="stat-label">High/Critical Risk</div>
                     </div>
                 </div>
             `;
 
         if (data.vulnerabilities.length > 0) {
-          html +=
-            '<h3 style="color: #e53e3e; margin-bottom: 15px;">⚠️ Security Vulnerabilities Detected</h3>';
+          html += `<h3 style="color: #e53e3e; margin-bottom: 15px;">⚠️ ${data.vulnerabilities.length} Security Vulnerabilities Detected</h3>`;
 
-          data.vulnerabilities.forEach((vuln, index) => {
-            html += `
+          // Group vulnerabilities by form action for better organization
+          const groupedVulns = data.vulnerabilities.reduce((groups, vuln) => {
+            const key = vuln.form_action;
+            if (!groups[key]) {
+              groups[key] = [];
+            }
+            groups[key].push(vuln);
+            return groups;
+          }, {});
+
+          Object.entries(groupedVulns).forEach(([formAction, vulns]) => {
+            html += `<h4 style="color: #4a5568; margin: 20px 0 15px 0; font-size: 1.1em;">📋 ${formAction}</h4>`;
+
+            vulns.forEach((vuln, index) => {
+              const explanation = vuln.payload_explanation;
+              const globalIndex = data.vulnerabilities.indexOf(vuln) + 1;
+
+              html += `
                         <div class="vulnerability high">
-                            <h4>SQL Injection Vulnerability #${index + 1}</h4>
-                            <p><strong>Form Action:</strong> ${
-                              vuln.form_action
-                            }</p>
-                            <p><strong>Payload:</strong> <code class="payload-code">${
-                              vuln.payload
-                            }</code></p>
-                            <div class="indicators">
-                                <strong>Response Indicators:</strong><br>
-                                ${vuln.response_indicators
-                                  .map(
-                                    (indicator) =>
-                                      `<span class="indicator">${indicator}</span>`
-                                  )
-                                  .join("")}
+                            <h4>Vulnerability #${globalIndex} - ${
+                explanation.technique
+              }</h4>
+                            
+                            <div class="vulnerability-details">
+                                <div class="vulnerability-info">
+                                    <p><strong>Confidence:</strong> ${
+                                      vuln.confidence
+                                    }</p>
+                                    <p><strong>Payload:</strong></p>
+                                    <div class="payload-code">${
+                                      vuln.payload
+                                    }</div>
+                                    <div class="indicators">
+                                        <strong>Response Indicators:</strong><br>
+                                        ${vuln.response_indicators
+                                          .map(
+                                            (indicator) =>
+                                              `<span class="indicator">${indicator}</span>`
+                                          )
+                                          .join("")}
+                                    </div>
+                                </div>
+                                
+                                <div class="payload-explanation">
+                                    <h5>Payload Analysis</h5>
+                                    <div class="technique-badge">${
+                                      explanation.technique
+                                    }</div>
+                                    <span class="risk-badge ${getRiskBadgeClass(
+                                      explanation.risk_level
+                                    )}">
+                                        ${explanation.risk_level} Risk
+                                    </span>
+                                    
+                                    <div class="explanation-text">
+                                        <strong>What it does:</strong> ${
+                                          explanation.explanation
+                                        }
+                                    </div>
+                                    
+                                    <div class="how-it-works">
+                                        <strong>How it works:</strong> ${
+                                          explanation.how_it_works
+                                        }
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     `;
+            });
           });
         } else {
           html += `
                     <div class="no-vulnerabilities">
                         <strong>No SQL injection vulnerabilities detected.</strong>
-                        <p>The tested forms appear to be secure against basic SQL injection attacks.</p>
+                        <p>The tested forms appear to be secure against the following attack types:</p>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>Boolean-based SQL injection</li>
+                            <li>UNION-based SQL injection</li>
+                            <li>Authentication bypass</li>
+                            <li>Comment-based injection</li>
+                            <li>System table access attempts</li>
+                        </ul>
                     </div>
                 `;
         }
