@@ -11,6 +11,7 @@ A modern, web-based SQL injection vulnerability scanner built with FastAPI and f
 Check out the live version of the SQL Injection Scanner:
 
 ## 🔗 [SQL Injection Scanner](https://sql-injection-scanner-acqivhuax-dinesh-gavai.vercel.app/)
+## 🔗 [SQL Injection Scanner](https://sql-injection-scanner-kxam.onrender.com/)
 
 ## ✨ Features
 
