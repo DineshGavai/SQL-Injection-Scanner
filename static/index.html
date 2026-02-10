@@ -44,12 +44,16 @@
         --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
       }
 
+      html, body {
+        overflow-x: hidden;
+        max-width: 100vw;
+      }
+
       body {
         font-family: var(--font-main);
         background: var(--bg-primary);
         color: var(--text-primary);
         min-height: 100vh;
-        overflow-x: hidden;
         -webkit-font-smoothing: antialiased;
       }
 
@@ -162,6 +166,9 @@
         -webkit-backdrop-filter: blur(20px);
         box-shadow: var(--shadow-card);
         margin-bottom: 20px;
+        overflow: hidden;
+        word-break: break-word;
+        overflow-wrap: anywhere;
       }
 
       /* ========== SCAN FORM ========== */
@@ -413,9 +420,10 @@
         color: var(--text-secondary);
         margin: 24px 0 12px;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 8px;
-        word-break: break-all;
+        word-break: break-word;
+        overflow-wrap: anywhere;
       }
 
       /* ========== VULNERABILITY CARD ========== */
@@ -427,6 +435,9 @@
         padding: 20px;
         margin-bottom: 14px;
         transition: transform 0.25s, box-shadow 0.25s;
+        overflow: hidden;
+        word-break: break-word;
+        overflow-wrap: anywhere;
       }
 
       .vuln-card:hover {
@@ -490,7 +501,8 @@
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        white-space: nowrap;
+        white-space: normal;
+        word-break: break-word;
       }
 
       .badge-critical {
@@ -528,6 +540,7 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 14px;
+        min-width: 0;
       }
 
       .detail-block {
@@ -535,6 +548,8 @@
         border: 1px solid var(--border-glass);
         border-radius: var(--radius-sm);
         padding: 14px;
+        overflow: hidden;
+        min-width: 0;
       }
 
       .detail-block-title {
@@ -559,8 +574,10 @@
         border: 1px solid rgba(0, 212, 255, 0.1);
         overflow-x: auto;
         word-break: break-all;
+        overflow-wrap: anywhere;
         white-space: pre-wrap;
         margin-top: 4px;
+        max-width: 100%;
       }
 
       .indicators-list {
@@ -577,7 +594,9 @@
         border-radius: 6px;
         font-size: 0.72rem;
         border: 1px solid rgba(248, 113, 113, 0.15);
-        word-break: break-all;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        max-width: 100%;
       }
 
       .explanation-block {
@@ -603,6 +622,8 @@
         font-size: 0.85rem;
         line-height: 1.6;
         margin-bottom: 10px;
+        word-break: break-word;
+        overflow-wrap: anywhere;
       }
 
       .explanation-text strong {
@@ -618,6 +639,8 @@
         font-size: 0.82rem;
         line-height: 1.6;
         color: var(--text-secondary);
+        word-break: break-word;
+        overflow-wrap: anywhere;
       }
 
       .how-it-works-box strong {
